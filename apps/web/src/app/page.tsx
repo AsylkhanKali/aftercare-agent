@@ -2,6 +2,7 @@
 
 import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 import { CopilotChat, useConfigureSuggestions } from "@copilotkit/react-core/v2";
+import Image from "next/image";
 import { AppControl } from "@/components/app-control";
 import { GenerativeUI } from "@/components/generative-ui";
 import {
@@ -160,8 +161,13 @@ export default function Home() {
       <main className="care-shell">
         <nav className="care-nav" aria-label="Primary navigation">
           <a className="care-brand" href="#top" aria-label="AfterCare home">
-            <span className="care-brand-mark" aria-hidden="true">A</span>
-            <span>AfterCare</span>
+            <Image
+              className="care-brand-logo"
+              src="/brand/aftercare-logo.jpeg"
+              alt=""
+              width="190"
+              height="59"
+            />
           </a>
           <div className="care-nav-copy">
             <span>Private demo</span>
