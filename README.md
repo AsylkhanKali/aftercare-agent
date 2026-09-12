@@ -29,12 +29,12 @@ For the chat assistant, add an OpenRouter key and choose any model on your accou
 ```dotenv
 MODEL_PROVIDER=openrouter
 OPENROUTER_API_KEY=your-openrouter-key
-MODEL=your-tool-capable-model
+MODEL=openrouter/free
 EXA_API_KEY=your-exa-key
 EXA_SEARCH_TYPE=fast
 ```
 
-Never commit `.env`. Any API key pasted into chat or a screenshot should be revoked and regenerated before use.
+`openrouter/free` lets the demo start with a free tool-capable model selected by OpenRouter; free-model availability and rate limits can vary. Never commit `.env`. Any API key pasted into chat or a screenshot should be revoked and regenerated before use.
 
 ## Verify
 
