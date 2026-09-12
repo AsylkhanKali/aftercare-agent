@@ -125,7 +125,7 @@ test("creates a Twilio call to only the configured fixed destination", async () 
     verifyVoiceSessionToken(voiceUrl.searchParams.get("session") ?? "", config.apiKeySecret),
     true,
   );
-  assert.equal(callBody.get("Method"), "POST");
+  assert.equal(callBody.get("Method"), null);
   assert.equal(result.status, "queued");
 });
 

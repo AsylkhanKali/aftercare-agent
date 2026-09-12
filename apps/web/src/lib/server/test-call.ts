@@ -154,7 +154,6 @@ export async function createTwilioTestCall(
     To: config.toNumber,
     From: config.fromNumber,
     Url: voiceUrlWithSession(config.voiceUrl, config.apiKeySecret),
-    Method: "POST",
   });
   const response = await fetcher(
     `https://api.twilio.com/2010-04-01/Accounts/${config.accountSid}/Calls.json`,
