@@ -1,6 +1,6 @@
-# CareCall web app
+# AfterCare web app
 
-This is the primary CareCall surface: a Next.js app with CopilotKit context/tools, an Exa clinic-search endpoint, and a clearly labeled test-call simulation.
+This is the primary AfterCare surface: a Next.js app with CopilotKit context/tools, an Exa clinic-search endpoint, and a clearly labeled test-call simulation.
 
 From the repository root:
 
@@ -17,7 +17,7 @@ Verification:
 ```bash
 npm run typecheck
 npm test
-npm run build --workspace carecall-web
+npm run build --workspace aftercare-web
 ```
 
 This prototype must not be represented as a diagnosis, medical image analysis, a real clinic call, or a confirmed real appointment.

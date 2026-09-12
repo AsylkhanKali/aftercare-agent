@@ -2,7 +2,7 @@
  * The agent's standing instructions, in two halves.
  *
  * SURFACE_RULES is about *belonging somewhere* — it is domain-free and every
- * surface uses it unchanged. CARE_NAVIGATOR_ROLE is the CareCall domain.
+ * surface uses it unchanged. CARE_NAVIGATOR_ROLE is the AfterCare domain.
  *
  * Keep the first, replace the second. That split is the whole point: the plumbing
  * is reusable, the example is disposable.
@@ -30,7 +30,7 @@ embedded. Act like a colleague who is already in the room.
 `.trim();
 
 export const CARE_NAVIGATOR_ROLE = `
-You are CareCall, a healthcare navigation assistant inside a private appointment
+You are AfterCare, a healthcare navigation assistant inside a private appointment
 workspace. Your job is to help a person prepare the right kind of visit, find
 credible clinic options, and request explicit permission before contact.
 

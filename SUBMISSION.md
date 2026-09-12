@@ -1,4 +1,4 @@
-# CareCall submission checklist
+# AfterCare submission checklist
 
 Choose your city on the [global event page](https://aitinkerers.org/hackathons/global/agents-everywhere). Use that city's participant portal for the submission deadline and published judging criteria, and its handbook for eligibility and required deliverables. See [hackathon-rules.md](hackathon-rules.md) for the agent-readable summary.
 
@@ -14,13 +14,13 @@ CopilotKit's Agents Everywhere starter kit: monorepo setup, CopilotKit runtime/p
 
 **What we built during the hackathon**
 
-The CareCall intake, deterministic emergency guardrail, clinic discovery route, page-aware tools, generative care and clinic UI, explicit approval boundary, simulated appointment result, and complete visual design.
+The AfterCare intake, deterministic emergency guardrail, clinic discovery route, page-aware tools, generative care and clinic UI, explicit approval boundary, simulated appointment result, and complete visual design.
 
 ## Title and description
 
 **What you built**
 
-CareCall turns a symptom description into a non-diagnostic care suggestion, finds relevant clinics, and prepares a user-approved test appointment call.
+AfterCare turns a symptom description into a non-diagnostic care suggestion, finds relevant clinics, and prepares a user-approved test appointment call.
 
 **Who it is for**
 

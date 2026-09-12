@@ -1,9 +1,9 @@
 {
-  "name": "carecall-agent",
+  "name": "aftercare-agent",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "CareCall healthcare navigation and appointment coordination hackathon prototype.",
+  "description": "AfterCare healthcare navigation and appointment coordination hackathon prototype.",
   "license": "MIT",
   "engines": {
     "node": ">=22"
@@ -19,7 +19,7 @@
     "channel:status": "npx copilotkit@latest channels status --json",
     "channel:setup": "npx copilotkit@latest channels setup",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "dev:web": "npm run dev --workspace carecall-web",
+    "dev:web": "npm run dev --workspace aftercare-web",
     "test": "npm run test --workspaces --if-present",
     "verify": "npm run typecheck && npm test"
   },

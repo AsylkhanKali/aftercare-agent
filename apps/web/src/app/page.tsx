@@ -35,7 +35,7 @@ export default function Home() {
         },
         {
           title: "Explain the next step",
-          message: "Explain what CareCall can and cannot do before I continue.",
+          message: "Explain what AfterCare can and cannot do before I continue.",
         },
       ],
       available: "before-first-message",
@@ -143,9 +143,9 @@ export default function Home() {
 
       <main className="care-shell">
         <nav className="care-nav" aria-label="Primary navigation">
-          <a className="care-brand" href="#top" aria-label="CareCall home">
+          <a className="care-brand" href="#top" aria-label="AfterCare home">
             <span className="care-brand-mark" aria-hidden="true">C</span>
-            <span>CareCall</span>
+            <span>AfterCare</span>
           </a>
           <div className="care-nav-copy">
             <span>Private demo</span>
@@ -158,7 +158,7 @@ export default function Home() {
             <p className="care-kicker">Healthcare navigation</p>
             <h1>From symptoms to a confirmed visit.</h1>
             <p className="care-lead">
-              Describe what is happening. CareCall helps you find the right place and arrange a test appointment.
+              Describe what is happening. AfterCare helps you find the right place and arrange a test appointment.
             </p>
           </div>
           <div className="care-privacy-note">
@@ -373,7 +373,7 @@ export default function Home() {
             <header>
               <div>
                 <p className="care-result-label">Care navigator</p>
-                <h2 id="assistant-title">Ask CareCall</h2>
+                <h2 id="assistant-title">Ask AfterCare</h2>
               </div>
               <span className="care-assistant-status">Ready</span>
             </header>
@@ -391,7 +391,7 @@ export default function Home() {
         </div>
 
         <footer className="care-footer">
-          <strong>CareCall prototype</strong>
+          <strong>AfterCare prototype</strong>
           <p>For emergencies, contact local emergency services immediately.</p>
         </footer>
       </main>

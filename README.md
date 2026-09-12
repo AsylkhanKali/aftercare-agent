@@ -1,13 +1,13 @@
-# CareCall Agent
+# AfterCare Agent
 
-CareCall is a hackathon prototype that helps a person turn a symptom description into a safer next step, find relevant nearby clinics, and explicitly approve a **test** appointment call.
+AfterCare is a hackathon prototype that helps a person turn a symptom description into a safer next step, find relevant nearby clinics, and explicitly approve a **test** appointment call.
 
 It is a care-navigation demo, not a medical device: it does not diagnose, prescribe, interpret uploaded images, or contact a real clinic. Emergency warning phrases stop the routine booking flow and direct the user to local emergency services.
 
 ## What the demo does
 
 1. The user describes symptoms, area, payment preference, and availability.
-2. CareCall suggests the type and urgency of care without diagnosing.
+2. AfterCare suggests the type and urgency of care without diagnosing.
 3. Exa finds possible clinics and returns source links. With no Exa key, clearly labeled sample clinics keep the demo runnable.
 4. CopilotKit gives the assistant access to the current page context and renders care/clinic cards.
 5. The user selects a clinic and must approve before a simulated test call confirms a sample time.
@@ -40,7 +40,7 @@ The default is a small tool-capable model routed through OpenRouter. It is inten
 
 ```bash
 npm run verify
-npm run build --workspace carecall-web
+npm run build --workspace aftercare-web
 ```
 
 The automated checks do not call sponsors or place phone calls. Before recording a demo, run one Exa-backed search and confirm its links manually.
@@ -61,7 +61,7 @@ The automated checks do not call sponsors or place phone calls. Before recording
 - OpenRouter for the language model
 - Exa for grounded clinic discovery
 
-The project began from CopilotKit's `agents-everywhere-starter-kit`. The infrastructure, runtime, and provider adapters are inherited; the CareCall workflow, visual design, safety boundary, clinic search route, and appointment simulation were created for the hackathon. See [SUBMISSION.md](SUBMISSION.md) for the demo checklist.
+The project began from CopilotKit's `agents-everywhere-starter-kit`. The infrastructure, runtime, and provider adapters are inherited; the AfterCare workflow, visual design, safety boundary, clinic search route, and appointment simulation were created for the hackathon. See [SUBMISSION.md](SUBMISSION.md) for the demo checklist.
 
 ## Important files
 
@@ -70,6 +70,6 @@ The project began from CopilotKit's `agents-everywhere-starter-kit`. The infrast
 - `apps/web/src/app/api/clinics/search/route.ts` — Exa-backed clinic discovery
 - `apps/web/src/components/app-control.tsx` — page context and agent tools
 - `apps/web/src/components/generative-ui.tsx` — agent-rendered cards and approval
-- `packages/agent-core/src/prompt.ts` — CareCall agent policy
+- `packages/agent-core/src/prompt.ts` — AfterCare agent policy
 
 MIT licensed. See [LICENSE](LICENSE).
