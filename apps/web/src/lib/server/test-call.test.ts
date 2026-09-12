@@ -3,10 +3,12 @@ import test from "node:test";
 import {
   TestCallConfigurationError,
   TestCallProviderError,
+  createVoiceSessionToken,
   createTwilioTestCall,
   isAllowedTestCallOrigin,
   loadTestCallConfig,
   matchesDemoPin,
+  verifyVoiceSessionToken,
 } from "./test-call";
 
 const config = {
@@ -67,6 +69,15 @@ test("compares the demo PIN without accepting different lengths", () => {
   assert.equal(matchesDemoPin("24681", "246810"), false);
 });
 
+test("voice session tokens are signed and expire", () => {
+  const now = Date.UTC(2026, 8, 12, 12);
+  const token = createVoiceSessionToken(config.apiKeySecret, now);
+  assert.equal(verifyVoiceSessionToken(token, config.apiKeySecret, now + 60_000), true);
+  assert.equal(verifyVoiceSessionToken(`${token}x`, config.apiKeySecret, now), false);
+  assert.equal(verifyVoiceSessionToken(token, "wrong-secret", now), false);
+  assert.equal(verifyVoiceSessionToken(token, config.apiKeySecret, now + 16 * 60_000), false);
+});
+
 test("accepts the exact local or configured deployment origin only", () => {
   const local = new Request("http://localhost:3100/api/calls/test", {
     headers: { host: "127.0.0.1:3100", origin: "http://127.0.0.1:3100" },
@@ -107,6 +118,14 @@ test("creates a Twilio call to only the configured fixed destination", async () 
   assert.doesNotMatch(requestedBody, /user-provided-number/);
   assert.match(requestedBody, /aftercare\.example/);
   assert.doesNotMatch(requestedBody, /Twiml=/);
+  const callBody = new URLSearchParams(requestedBody);
+  const voiceUrl = new URL(String(callBody.get("Url")));
+  assert.equal(voiceUrl.origin + voiceUrl.pathname, config.voiceUrl);
+  assert.equal(
+    verifyVoiceSessionToken(voiceUrl.searchParams.get("session") ?? "", config.apiKeySecret),
+    true,
+  );
+  assert.equal(callBody.get("Method"), "POST");
   assert.equal(result.status, "queued");
 });
 

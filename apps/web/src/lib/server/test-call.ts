@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 export type TestCallConfig = {
   accountSid: string;
@@ -21,6 +21,7 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
 const ACCOUNT_SID_PATTERN = /^AC[0-9a-fA-F]{32}$/;
 const API_KEY_SID_PATTERN = /^SK[0-9a-fA-F]{32}$/;
 const CALL_SID_PATTERN = /^CA[0-9a-fA-F]{32}$/;
+const VOICE_SESSION_TTL_SECONDS = 15 * 60;
 export const TWILIO_TRIAL_VOICE_TEMPLATE_URL =
   "https://webhooks.twilio.com/v1/Voice/Template/voice_speech_recognition";
 
@@ -82,6 +83,41 @@ export function matchesDemoPin(provided: string, expected: string) {
   );
 }
 
+function voiceSessionSignature(payload: string, secret: string) {
+  return createHmac("sha256", secret)
+    .update("aftercare-voice-session\0")
+    .update(payload)
+    .digest("base64url");
+}
+
+export function createVoiceSessionToken(secret: string, now = Date.now()) {
+  const issuedAt = Math.floor(now / 1000).toString(36);
+  const nonce = randomBytes(16).toString("base64url");
+  const payload = `${issuedAt}.${nonce}`;
+  return `${payload}.${voiceSessionSignature(payload, secret)}`;
+}
+
+export function verifyVoiceSessionToken(token: string, secret: string, now = Date.now()) {
+  const [issuedAtValue, nonce, providedSignature, ...extra] = token.split(".");
+  if (!issuedAtValue || !nonce || !providedSignature || extra.length > 0) return false;
+
+  const issuedAt = Number.parseInt(issuedAtValue, 36);
+  const currentTime = Math.floor(now / 1000);
+  if (!Number.isFinite(issuedAt) || issuedAt > currentTime + 60) return false;
+  if (currentTime - issuedAt > VOICE_SESSION_TTL_SECONDS) return false;
+
+  const payload = `${issuedAtValue}.${nonce}`;
+  const expected = Buffer.from(voiceSessionSignature(payload, secret));
+  const provided = Buffer.from(providedSignature);
+  return provided.length === expected.length && timingSafeEqual(provided, expected);
+}
+
+function voiceUrlWithSession(url: string, secret: string) {
+  const parsed = new URL(url);
+  parsed.searchParams.set("session", createVoiceSessionToken(secret));
+  return parsed.toString();
+}
+
 export function isAllowedTestCallOrigin(request: Request, environment: Environment) {
   const incomingOrigin = request.headers.get("origin");
   if (!incomingOrigin) return false;
@@ -117,7 +153,8 @@ export async function createTwilioTestCall(
   const body = new URLSearchParams({
     To: config.toNumber,
     From: config.fromNumber,
-    Url: config.voiceUrl,
+    Url: voiceUrlWithSession(config.voiceUrl, config.apiKeySecret),
+    Method: "POST",
   });
   const response = await fetcher(
     `https://api.twilio.com/2010-04-01/Accounts/${config.accountSid}/Calls.json`,

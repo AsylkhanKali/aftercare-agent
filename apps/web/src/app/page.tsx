@@ -352,11 +352,11 @@ export default function Home() {
                     <div className="care-consent-copy">
                       <p>A real call will go only to the verified team test number.</p>
                       <ul>
-                        <li>After deployment, Twilio will read AfterCare's own safe test script.</li>
-                        <li>Before deployment, Twilio uses its built-in Trial fallback.</li>
-                        <li>The selected clinic and intake stay on this page only.</li>
+                        <li>The deployed call lets you speak with the AfterCare AI prototype.</li>
+                        <li>Twilio transcribes your speech and OpenRouter generates each reply.</li>
+                        <li>The selected clinic and website intake are not sent into the call.</li>
                       </ul>
-                      <p>No symptoms, photo, identity, phone number, or appointment preference will be shared.</p>
+                      <p>Use demo information only. Anything you say on the call is processed to generate a response.</p>
                       <label className="care-demo-pin" htmlFor="demo-call-pin">
                         <span>Team demo PIN</span>
                         <input
