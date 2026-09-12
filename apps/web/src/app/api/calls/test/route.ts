@@ -6,7 +6,6 @@ import {
   isAllowedTestCallOrigin,
   loadTestCallConfig,
   matchesDemoPin,
-  parseTestCallDetails,
 } from "@/lib/server/test-call";
 
 const CALL_COOLDOWN_MS = 60_000;
@@ -41,17 +40,10 @@ export async function POST(request: Request) {
       );
     }
 
-    let input: unknown;
-    try {
-      input = await request.json();
-    } catch {
-      return response({ error: "The test call request must be valid JSON." }, 400);
-    }
-    const details = parseTestCallDetails(input);
     nextCallAllowedAt = now + CALL_COOLDOWN_MS;
     let call: Awaited<ReturnType<typeof createTwilioTestCall>>;
     try {
-      call = await createTwilioTestCall(config, details);
+      call = await createTwilioTestCall(config);
     } catch (error) {
       nextCallAllowedAt = 0;
       throw error;

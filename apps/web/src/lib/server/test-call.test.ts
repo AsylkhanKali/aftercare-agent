@@ -3,30 +3,32 @@ import test from "node:test";
 import {
   TestCallConfigurationError,
   TestCallProviderError,
-  buildTestCallTwiml,
   createTwilioTestCall,
   isAllowedTestCallOrigin,
   loadTestCallConfig,
   matchesDemoPin,
-  parseTestCallDetails,
 } from "./test-call";
 
 const config = {
   accountSid: `AC${"a".repeat(32)}`,
-  authToken: "secret-token",
+  apiKeySid: `SK${"c".repeat(32)}`,
+  apiKeySecret: "secret-token",
   fromNumber: "+15550001111",
   toNumber: "+15550002222",
   demoPin: "246810",
+  voiceUrl: "https://aftercare.example/api/calls/voice",
 };
 
 test("loads an explicitly enabled fixed-number test-call configuration", () => {
   assert.deepEqual(loadTestCallConfig({
     ENABLE_REAL_TEST_CALLS: "true",
     TWILIO_ACCOUNT_SID: config.accountSid,
-    TWILIO_AUTH_TOKEN: config.authToken,
+    TWILIO_API_KEY_SID: config.apiKeySid,
+    TWILIO_API_KEY_SECRET: config.apiKeySecret,
     TWILIO_FROM_NUMBER: config.fromNumber,
     TWILIO_TEST_TO_NUMBER: config.toNumber,
     AFTERCARE_DEMO_CALL_PIN: config.demoPin,
+    VERCEL_URL: "aftercare.example",
   }), config);
 });
 
@@ -35,7 +37,8 @@ test("rejects disabled, malformed, or weak test-call configuration", () => {
   assert.throws(() => loadTestCallConfig({
     ENABLE_REAL_TEST_CALLS: "true",
     TWILIO_ACCOUNT_SID: "invalid",
-    TWILIO_AUTH_TOKEN: "secret",
+    TWILIO_API_KEY_SID: config.apiKeySid,
+    TWILIO_API_KEY_SECRET: "secret",
     TWILIO_FROM_NUMBER: config.fromNumber,
     TWILIO_TEST_TO_NUMBER: config.toNumber,
     AFTERCARE_DEMO_CALL_PIN: config.demoPin,
@@ -65,21 +68,6 @@ test("accepts the exact local or configured deployment origin only", () => {
   }), false);
 });
 
-test("sanitizes untrusted fields and escapes them before building TwiML", () => {
-  const details = parseTestCallDetails({
-    clinicName: "  Test & <Clinic>  ",
-    specialty: "Dermatology\u0000",
-    location: "Abu   Dhabi",
-    preferredTime: "Tomorrow",
-    payment: "Self-pay",
-  });
-  const twiml = buildTestCallTwiml(details);
-  assert.match(twiml, /Test &amp; &lt;Clinic&gt;/);
-  assert.doesNotMatch(twiml, /\u0000/);
-  assert.doesNotMatch(twiml, /<Clinic>/);
-  assert.match(twiml, /No symptoms, image, identity, or payment details were shared/);
-});
-
 test("creates a Twilio call to only the configured fixed destination", async () => {
   let requestedUrl = "";
   let requestedBody = "";
@@ -92,22 +80,20 @@ test("creates a Twilio call to only the configured fixed destination", async () 
     }), { status: 201, headers: { "Content-Type": "application/json" } });
   };
 
-  const result = await createTwilioTestCall(
-    config,
-    parseTestCallDetails({ clinicName: "Demo Clinic" }),
-    fetcher as typeof fetch,
-  );
+  const result = await createTwilioTestCall(config, fetcher as typeof fetch);
 
   assert.match(requestedUrl, new RegExp(config.accountSid));
   assert.match(requestedBody, new RegExp(`To=${encodeURIComponent(config.toNumber)}`));
   assert.doesNotMatch(requestedBody, /user-provided-number/);
+  assert.match(requestedBody, /aftercare\.example/);
+  assert.doesNotMatch(requestedBody, /Twiml=/);
   assert.equal(result.status, "queued");
 });
 
 test("turns provider failures and malformed responses into controlled errors", async () => {
   const rejected = async () => new Response("denied", { status: 401 });
   await assert.rejects(
-    createTwilioTestCall(config, parseTestCallDetails({}), rejected as typeof fetch),
+    createTwilioTestCall(config, rejected as typeof fetch),
     TestCallProviderError,
   );
 
@@ -116,7 +102,7 @@ test("turns provider failures and malformed responses into controlled errors", a
     headers: { "Content-Type": "application/json" },
   });
   await assert.rejects(
-    createTwilioTestCall(config, parseTestCallDetails({}), malformed as typeof fetch),
+    createTwilioTestCall(config, malformed as typeof fetch),
     TestCallProviderError,
   );
 });

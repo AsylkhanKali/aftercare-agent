@@ -10,7 +10,7 @@ It is a care-navigation demo, not a medical device: it does not diagnose, prescr
 2. AfterCare suggests the type and urgency of care without diagnosing.
 3. Exa finds possible clinics and returns source links. With no Exa key, clearly labeled sample clinics keep the demo runnable.
 4. CopilotKit gives the assistant access to the current page context and renders care/clinic cards.
-5. The user selects a clinic and must approve before a real call goes to a fixed, verified team test number. The selected clinic is never called.
+5. The user selects a clinic and must approve before a real Twilio Trial call goes to a fixed, verified team test number. After deployment the call reads AfterCare's own safe test script; the selected clinic is never called.
 
 ## Run locally
 
@@ -36,7 +36,8 @@ EXA_SEARCH_TYPE=fast
 # Optional supervised real-call demo
 ENABLE_REAL_TEST_CALLS=true
 TWILIO_ACCOUNT_SID=your-account-sid
-TWILIO_AUTH_TOKEN=your-auth-token
+TWILIO_API_KEY_SID=your-restricted-api-key-sid
+TWILIO_API_KEY_SECRET=your-api-key-secret
 TWILIO_FROM_NUMBER=your-twilio-trial-number
 TWILIO_TEST_TO_NUMBER=your-verified-team-number
 AFTERCARE_DEMO_CALL_PIN=choose-a-private-pin
@@ -62,7 +63,7 @@ The automated checks do not call sponsors or place phone calls. Before recording
 - Clinic pages are treated as untrusted search results, not as medical advice.
 - No contact happens before an explicit user click.
 - Twilio can place a real call only to the fixed verified team test number after explicit approval and a private demo PIN.
-- The call shares the selected clinic name, specialty, city, availability, and payment preference. It never shares symptoms, photos, identity, or the user's phone number.
+- The free Trial call reads a generic non-sensitive AfterCare test script after deployment and never shares the intake, symptoms, photos, identity, or the user's phone number. Local calls use Twilio's built-in fallback until a public webhook exists.
 - A one-minute server cooldown limits repeated calls. Keep the integration disabled outside supervised demos; this is not production-grade authentication or abuse prevention.
 - The selected clinic is never called and no real appointment is created.
 

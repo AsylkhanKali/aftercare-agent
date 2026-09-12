@@ -108,23 +108,15 @@ export default function Home() {
   }, []);
 
   const approveTestCall = useCallback(async () => {
-    if (!selectedClinic || !assessment) return;
+    if (!selectedClinic) return;
     setBookingStatus("calling");
     setCallError("");
     try {
       const response = await fetch("/api/calls/test", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "x-aftercare-demo-pin": demoCallPin,
         },
-        body: JSON.stringify({
-          clinicName: selectedClinic.name,
-          specialty: assessment.specialty,
-          location: intake.location,
-          preferredTime: intake.availability,
-          payment: intake.insurance,
-        }),
       });
       const payload = await response.json() as { error?: string };
       if (!response.ok) throw new Error(payload.error ?? "The real test call could not be started.");
@@ -134,7 +126,7 @@ export default function Home() {
       setCallError(error instanceof Error ? error.message : "The real test call could not be started.");
       setBookingStatus("error");
     }
-  }, [assessment, demoCallPin, intake.availability, intake.insurance, intake.location, selectedClinic]);
+  }, [demoCallPin, selectedClinic]);
 
   const cancelCall = useCallback(() => {
     setBookingStatus("idle");
@@ -352,14 +344,13 @@ export default function Home() {
                 {bookingStatus === "approval" && (
                   <>
                     <div className="care-consent-copy">
-                      <p>A real call will go only to the verified team test number. The recipient will hear:</p>
+                      <p>A real call will go only to the verified team test number.</p>
                       <ul>
-                        <li>Selected option: {selectedClinic.name}</li>
-                        <li>Requested specialty: {assessment?.specialty}</li>
-                        <li>Preferred time: {intake.availability}</li>
-                        <li>Payment: {intake.insurance}</li>
+                        <li>After deployment, Twilio will read AfterCare's own safe test script.</li>
+                        <li>Before deployment, Twilio uses its built-in Trial fallback.</li>
+                        <li>The selected clinic and intake stay on this page only.</li>
                       </ul>
-                      <p>Your symptom text, photo, identity, and phone number will not be shared.</p>
+                      <p>No symptoms, photo, identity, phone number, or appointment preference will be shared.</p>
                       <label className="care-demo-pin" htmlFor="demo-call-pin">
                         <span>Team demo PIN</span>
                         <input
@@ -403,7 +394,7 @@ export default function Home() {
                   <div className="care-confirmation">
                     <p className="care-result-label">Real test call accepted</p>
                     <strong>Answer the team phone</strong>
-                    <span>Twilio accepted the outbound call request.</span>
+                    <span>Twilio accepted the outbound Trial call request.</span>
                     <p>The call goes only to the configured test number. No clinic was contacted and no appointment was created.</p>
                   </div>
                 )}

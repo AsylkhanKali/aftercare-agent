@@ -20,6 +20,6 @@ npm test
 npm run build --workspace aftercare-web
 ```
 
-The fixed-number call requires the Twilio variables documented in the root `.env.example`. It is protected by a private demo PIN, a same-origin check, and a one-minute server cooldown. Keep it disabled on a public deployment except during a supervised demo.
+The fixed-number call requires the Twilio variables documented in the root `.env.example`, including a Restricted API key with only `/twilio/voice/calls/create` permission. On Vercel, Twilio reads the app's generic AfterCare TwiML response; local calls use Twilio's built-in fallback until a public webhook exists. Neither path sends intake data. The call is protected by a private demo PIN, a same-origin check, and a one-minute server cooldown. Keep it disabled on a public deployment except during a supervised demo.
 
 This prototype must not be represented as a diagnosis, medical image analysis, a real clinic call, or a confirmed real appointment. The real call goes only to the configured team test phone.
