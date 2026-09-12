@@ -42,9 +42,17 @@ export function loadTestCallConfig(environment: Environment): TestCallConfig {
   const toNumber = required(environment.TWILIO_TEST_TO_NUMBER, "TWILIO_TEST_TO_NUMBER");
   const demoPin = required(environment.AFTERCARE_DEMO_CALL_PIN, "AFTERCARE_DEMO_CALL_PIN");
   const deployedHost = environment.VERCEL_URL?.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const productionHost = environment.VERCEL_PROJECT_PRODUCTION_URL
+    ?.trim()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
   const explicitVoiceUrl = environment.AFTERCARE_VOICE_WEBHOOK_URL?.trim();
   const voiceUrl = explicitVoiceUrl
-    || (deployedHost ? `https://${deployedHost}/api/calls/voice` : TWILIO_TRIAL_VOICE_TEMPLATE_URL);
+    || (productionHost
+      ? `https://${productionHost}/api/calls/voice`
+      : deployedHost
+        ? `https://${deployedHost}/api/calls/voice`
+        : TWILIO_TRIAL_VOICE_TEMPLATE_URL);
 
   if (!ACCOUNT_SID_PATTERN.test(accountSid)) {
     throw new TestCallConfigurationError("TWILIO_ACCOUNT_SID has an invalid format.");

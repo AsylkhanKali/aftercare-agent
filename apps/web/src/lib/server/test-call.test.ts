@@ -32,6 +32,22 @@ test("loads an explicitly enabled fixed-number test-call configuration", () => {
   }), config);
 });
 
+test("uses the public production domain instead of a protected deployment domain", () => {
+  const loaded = loadTestCallConfig({
+    ENABLE_REAL_TEST_CALLS: "true",
+    TWILIO_ACCOUNT_SID: config.accountSid,
+    TWILIO_API_KEY_SID: config.apiKeySid,
+    TWILIO_API_KEY_SECRET: config.apiKeySecret,
+    TWILIO_FROM_NUMBER: config.fromNumber,
+    TWILIO_TEST_TO_NUMBER: config.toNumber,
+    AFTERCARE_DEMO_CALL_PIN: config.demoPin,
+    VERCEL_URL: "aftercare-protected-deployment.example",
+    VERCEL_PROJECT_PRODUCTION_URL: "aftercare.example",
+  });
+
+  assert.equal(loaded.voiceUrl, config.voiceUrl);
+});
+
 test("rejects disabled, malformed, or weak test-call configuration", () => {
   assert.throws(() => loadTestCallConfig({}), TestCallConfigurationError);
   assert.throws(() => loadTestCallConfig({
