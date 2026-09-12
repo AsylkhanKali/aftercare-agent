@@ -7,6 +7,7 @@ import {
   loadTestCallConfig,
   matchesDemoPin,
 } from "@/lib/server/test-call";
+import { parseVoiceCallBrief } from "@/lib/server/voice-conversation";
 
 const CALL_COOLDOWN_MS = 60_000;
 let nextCallAllowedAt = 0;
@@ -30,6 +31,11 @@ export async function POST(request: Request) {
       return response({ error: "The demo call PIN is incorrect." }, 403);
     }
 
+    const brief = parseVoiceCallBrief(await request.json().catch(() => null));
+    if (!brief) {
+      return response({ error: "The clinic call brief is incomplete." }, 400);
+    }
+
     const now = Date.now();
     if (now < nextCallAllowedAt) {
       const retryAfter = Math.ceil((nextCallAllowedAt - now) / 1000);
@@ -43,7 +49,7 @@ export async function POST(request: Request) {
     nextCallAllowedAt = now + CALL_COOLDOWN_MS;
     let call: Awaited<ReturnType<typeof createTwilioTestCall>>;
     try {
-      call = await createTwilioTestCall(config);
+      call = await createTwilioTestCall(config, brief);
     } catch (error) {
       nextCallAllowedAt = 0;
       throw error;

@@ -10,7 +10,7 @@ It is a care-navigation demo, not a medical device: it does not diagnose, prescr
 2. AfterCare suggests the type and urgency of care without diagnosing.
 3. Exa finds possible clinics and returns source links. With no Exa key, clearly labeled sample clinics keep the demo runnable.
 4. CopilotKit gives the assistant access to the current page context and renders care/clinic cards.
-5. The user selects a clinic and must approve before a real Twilio Trial call goes to a fixed, verified team test number. After deployment the call reads AfterCare's own safe test script; the selected clinic is never called.
+5. The user selects a clinic and must approve before a real Twilio Trial call goes to a fixed, verified team test number that simulates the clinic receptionist. AfterCare then holds a short appointment-request conversation using the approved brief; the selected real clinic is never called.
 
 ## Run locally
 
@@ -63,7 +63,8 @@ The automated checks do not call sponsors or place phone calls. Before recording
 - Clinic pages are treated as untrusted search results, not as medical advice.
 - No contact happens before an explicit user click.
 - Twilio can place a real call only to the fixed verified team test number after explicit approval and a private demo PIN.
-- The free Trial call reads a generic non-sensitive AfterCare test script after deployment and never shares the intake, symptoms, photos, identity, or the user's phone number. Local calls use Twilio's built-in fallback until a public webhook exists.
+- The Trial call uses only the approved clinic, specialty, symptom summary, location, payment type, and preferred time. The brief and short conversation state are encrypted between voice webhooks and expire after 30 minutes.
+- The call never sends the uploaded photo, full identity, phone number, government ID, insurance number, or payment details.
 - A one-minute server cooldown limits repeated calls. Keep the integration disabled outside supervised demos; this is not production-grade authentication or abuse prevention.
 - The selected clinic is never called and no real appointment is created.
 
@@ -80,6 +81,7 @@ The project began from CopilotKit's `agents-everywhere-starter-kit`. The infrast
 ## Important files
 
 - `apps/web/src/app/page.tsx` — complete user flow
+- `apps/web/src/components/recovery-dashboard.tsx` — recovery dashboard adapted from the [team interface repository](https://github.com/aabuessa/aftercare)
 - `apps/web/src/lib/care.ts` — deterministic triage guardrail and sample data
 - `apps/web/src/app/api/clinics/search/route.ts` — Exa-backed clinic discovery
 - `apps/web/src/app/api/calls/test/route.ts` — guarded Twilio test-call endpoint

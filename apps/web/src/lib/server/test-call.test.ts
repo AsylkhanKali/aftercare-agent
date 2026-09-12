@@ -10,6 +10,7 @@ import {
   matchesDemoPin,
   verifyVoiceSessionToken,
 } from "./test-call";
+import { openVoiceBrief, type VoiceCallBrief } from "./voice-conversation";
 
 const config = {
   accountSid: `AC${"a".repeat(32)}`,
@@ -19,6 +20,14 @@ const config = {
   toNumber: "+15550002222",
   demoPin: "246810",
   voiceUrl: "https://aftercare.example/api/calls/voice",
+};
+const brief: VoiceCallBrief = {
+  clinicName: "Harbor Family Clinic",
+  specialty: "Primary care",
+  symptoms: "A persistent cough for four days",
+  location: "Abu Dhabi",
+  insurance: "Self-pay",
+  availability: "Weekday afternoon",
 };
 
 test("loads an explicitly enabled fixed-number test-call configuration", () => {
@@ -111,7 +120,7 @@ test("creates a Twilio call to only the configured fixed destination", async () 
     }), { status: 201, headers: { "Content-Type": "application/json" } });
   };
 
-  const result = await createTwilioTestCall(config, fetcher as typeof fetch);
+  const result = await createTwilioTestCall(config, brief, fetcher as typeof fetch);
 
   assert.match(requestedUrl, new RegExp(config.accountSid));
   assert.match(requestedBody, new RegExp(`To=${encodeURIComponent(config.toNumber)}`));
@@ -125,6 +134,10 @@ test("creates a Twilio call to only the configured fixed destination", async () 
     verifyVoiceSessionToken(voiceUrl.searchParams.get("session") ?? "", config.apiKeySecret),
     true,
   );
+  assert.deepEqual(
+    openVoiceBrief(voiceUrl.searchParams.get("brief") ?? "", config.apiKeySecret),
+    brief,
+  );
   assert.equal(callBody.get("Method"), null);
   assert.equal(result.status, "queued");
 });
@@ -132,7 +145,7 @@ test("creates a Twilio call to only the configured fixed destination", async () 
 test("turns provider failures and malformed responses into controlled errors", async () => {
   const rejected = async () => new Response("denied", { status: 401 });
   await assert.rejects(
-    createTwilioTestCall(config, rejected as typeof fetch),
+    createTwilioTestCall(config, brief, rejected as typeof fetch),
     TestCallProviderError,
   );
 
@@ -141,7 +154,7 @@ test("turns provider failures and malformed responses into controlled errors", a
     headers: { "Content-Type": "application/json" },
   });
   await assert.rejects(
-    createTwilioTestCall(config, malformed as typeof fetch),
+    createTwilioTestCall(config, brief, malformed as typeof fetch),
     TestCallProviderError,
   );
 });

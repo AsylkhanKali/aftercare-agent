@@ -4,9 +4,11 @@ import {
   verifyVoiceSessionToken,
 } from "@/lib/server/test-call";
 import {
+  openVoiceBrief,
   sealVoiceState,
   voiceActionUrl,
   voiceGatherTwiml,
+  voiceOpeningPrompt,
 } from "@/lib/server/voice-conversation";
 
 const CALL_SID_PATTERN = /^CA[0-9a-fA-F]{32}$/;
@@ -34,9 +36,12 @@ export async function POST(request: Request) {
   try {
     const config = loadTestCallConfig(process.env);
     const session = new URL(request.url).searchParams.get("session") ?? "";
+    const briefToken = new URL(request.url).searchParams.get("brief") ?? "";
     if (!verifyVoiceSessionToken(session, config.apiKeySecret)) {
       return new Response("Forbidden", { status: 403 });
     }
+    const brief = openVoiceBrief(briefToken, config.apiKeySecret);
+    if (!brief) return new Response("Invalid call brief", { status: 400 });
 
     const form = await request.formData();
     const callSid = String(form.get("CallSid") ?? "");
@@ -48,11 +53,12 @@ export async function POST(request: Request) {
       version: 1,
       callSid,
       expiresAt: Date.now() + 30 * 60_000,
+      brief,
       turns: [],
     }, config.apiKeySecret);
 
     return twimlResponse(voiceGatherTwiml(
-      "Hello, this is AfterCare, an AI healthcare navigation prototype. I can answer general questions and help you prepare for care, but I cannot diagnose you or book a real appointment. What would you like help with?",
+      voiceOpeningPrompt(brief),
       voiceActionUrl(state),
     ));
   } catch (error) {

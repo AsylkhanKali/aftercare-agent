@@ -1,4 +1,3 @@
-import { assessSymptoms } from "@/lib/care";
 import { loadTestCallConfig } from "@/lib/server/test-call";
 import {
   generateVoiceReply,
@@ -41,27 +40,21 @@ export async function POST(request: Request) {
       .slice(0, 600);
     if (!speech) {
       return twimlResponse(voiceGatherTwiml(
-        "I did not hear a response. Please say your question, or say goodbye to end the call.",
+        "I did not hear a response. Could you repeat that, please?",
         voiceActionUrl(token),
       ));
     }
 
     if (isVoiceEndIntent(speech)) {
-      return twimlResponse(voiceHangupTwiml("Thank you for testing AfterCare. Goodbye."));
-    }
-
-    if (assessSymptoms(speech).urgency === "emergency") {
-      return twimlResponse(voiceHangupTwiml(
-        "Your words may describe an emergency. Call your local emergency number now, and do not wait for this prototype or a routine appointment.",
-      ));
+      return twimlResponse(voiceHangupTwiml("Thank you for your time. Goodbye."));
     }
 
     const withUser = trimVoiceTurns([...state.turns, { role: "user", content: speech }]);
     let reply: string;
     try {
-      reply = await generateVoiceReply(withUser, process.env);
+      reply = await generateVoiceReply(withUser, state.brief, process.env);
     } catch {
-      reply = "I could not generate an answer just now. Please ask a shorter general care question, or say goodbye to end the call.";
+      reply = "I could not process that response. Could you repeat the appointment information briefly?";
     }
 
     const turns = trimVoiceTurns([...withUser, { role: "assistant", content: reply }]);

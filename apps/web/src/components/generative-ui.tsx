@@ -7,7 +7,7 @@ export function GenerativeUI() {
   useHumanInTheLoop({
     name: "confirm_contact_plan",
     description:
-      "Ask for explicit approval before starting a real Twilio Trial call to the fixed verified team test number. The safe test script shares no intake details. Approval only confirms the plan; the user must still use the page button and private demo PIN. Never claim that a clinic will be called.",
+      "Ask for explicit approval before starting a real Twilio Trial call to the fixed verified team test number that simulates a clinic receptionist. The call uses the approved clinic, specialty, symptom summary, location, payment type, and preferred time, but never the photo or identity. Approval only confirms the plan; the user must still use the page button and private demo PIN. Never claim that a real clinic will be called or a real appointment booked.",
     parameters: z.object({
       clinic: z.string(),
     }),
@@ -19,7 +19,7 @@ export function GenerativeUI() {
         <article className="agent-approval">
           <p className="care-result-label">Permission check</p>
           <h3>Contact {args.clinic ?? "this clinic"}?</h3>
-          <p>The real call goes to the fixed team test number and plays a safe test script. No intake details are shared.</p>
+          <p>The fixed team number will simulate the clinic. AfterCare will use the approved appointment brief, but not the photo or identity.</p>
           <div className="care-actions">
             <button
               type="button"

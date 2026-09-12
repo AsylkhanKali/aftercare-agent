@@ -101,6 +101,9 @@ h3 {
 .care-brand {
   display: inline-flex;
   align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
   text-decoration: none;
 }
 
@@ -121,6 +124,37 @@ h3 {
 .care-nav-copy span + span {
   padding-left: 18px;
   border-left: 1px solid var(--border);
+}
+
+.care-section-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.care-section-nav button {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.care-section-nav button:hover {
+  color: var(--heading);
+  background: var(--surface-soft);
+}
+
+.care-section-nav button.is-active {
+  color: var(--surface);
+  background: var(--accent);
 }
 
 .care-header {
@@ -731,6 +765,344 @@ h3 {
   font-size: 12px;
 }
 
+.today-dashboard {
+  display: grid;
+  gap: 24px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 4%, rgba(220, 239, 235, 0.75), transparent 26%),
+    var(--ground);
+  box-shadow: var(--shadow);
+}
+
+.today-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 28px 30px;
+  border: 1px solid rgba(220, 227, 225, 0.9);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.today-status-card h1 {
+  margin: 0 0 6px;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.today-status-card > div > p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.today-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.today-status-actions .care-primary-action {
+  margin: 0;
+}
+
+.today-status-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.today-status-on-track {
+  color: #237a57;
+  background: #e7f4ec;
+}
+
+.today-status-needs-attention {
+  color: #a86408;
+  background: #fff1d6;
+}
+
+.today-status-urgent {
+  color: #b42332;
+  background: #fce8ea;
+}
+
+.today-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.8fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.today-chat,
+.today-detail-card {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.today-chat {
+  display: grid;
+  grid-template-rows: auto minmax(430px, 1fr) auto;
+  min-height: 650px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.today-chat > header,
+.today-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.today-chat > header {
+  padding: 24px 26px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.today-chat h2,
+.today-detail-card h2 {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+}
+
+.today-chat > header > span,
+.today-card-heading > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.today-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  overflow-y: auto;
+  padding: 26px;
+  background:
+    linear-gradient(rgba(250, 248, 243, 0.72), rgba(250, 248, 243, 0.72)),
+    radial-gradient(circle at 20% 10%, rgba(220, 239, 235, 0.82), transparent 42%);
+}
+
+.today-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  max-width: min(82%, 580px);
+  animation: today-enter 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.today-message p {
+  margin: 0;
+  padding: 12px 15px;
+  border: 1px solid var(--border);
+  border-radius: 7px 16px 16px 16px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.today-message-patient {
+  align-self: flex-end;
+}
+
+.today-message-patient p {
+  border-color: transparent;
+  border-radius: 16px 7px 16px 16px;
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.today-agent-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--surface-warm);
+  color: var(--coral);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.today-composer {
+  display: grid;
+  gap: 9px;
+  padding: 18px 22px 22px;
+  border-top: 1px solid var(--border);
+}
+
+.today-composer > label {
+  color: var(--heading);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.today-composer > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+}
+
+.today-composer input {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.today-composer button {
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.today-composer button:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.today-composer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.today-sidebar {
+  display: grid;
+  gap: 18px;
+}
+
+.today-detail-card {
+  padding: 22px;
+  border-radius: 16px;
+}
+
+.today-detail-card > p:last-child,
+.today-followup-card > p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.today-detail-lead {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.today-detail-lead strong {
+  color: var(--text);
+}
+
+.today-dose-list {
+  display: grid;
+  gap: 3px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-dose-list button {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 9px;
+  align-items: center;
+  width: 100%;
+  padding: 9px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  transition: background 180ms ease;
+}
+
+.today-dose-list button:hover {
+  background: var(--surface-soft);
+}
+
+.today-dose-list small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.today-dose-complete,
+.today-dose-pending {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.today-dose-complete {
+  background: #e7f4ec;
+  color: #237a57;
+}
+
+.today-dose-pending {
+  border: 1px solid var(--border-strong);
+}
+
+.today-trend {
+  text-transform: capitalize;
+}
+
+.today-trend-improving {
+  color: #237a57 !important;
+}
+
+.today-trend-worsening {
+  color: #b42332 !important;
+}
+
+.today-followup-card {
+  background: var(--surface-warm);
+}
+
+.today-followup-card > strong {
+  display: block;
+  margin-top: 18px;
+  color: var(--heading);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-followup-card .care-secondary-action {
+  width: 100%;
+}
+
+@keyframes today-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes care-pulse {
   70% {
     box-shadow: 0 0 0 10px rgba(227, 111, 86, 0);
@@ -779,6 +1151,23 @@ h3 {
     border-top: 1px solid var(--border);
     border-left: 0;
   }
+
+  .care-nav {
+    flex-wrap: wrap;
+  }
+
+  .care-section-nav {
+    order: 3;
+    width: 100%;
+  }
+
+  .care-section-nav button {
+    flex: 1;
+  }
+
+  .today-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 560px) {
@@ -797,6 +1186,49 @@ h3 {
 
   .care-nav-copy span:first-child {
     display: none;
+  }
+
+  .today-dashboard {
+    padding: 16px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .today-status-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 22px;
+  }
+
+  .today-status-actions {
+    width: 100%;
+  }
+
+  .today-status-actions .care-primary-action {
+    flex: 1;
+  }
+
+  .today-chat {
+    grid-template-rows: auto minmax(420px, 1fr) auto;
+  }
+
+  .today-chat > header,
+  .today-thread {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .today-message {
+    max-width: 94%;
+  }
+
+  .today-composer > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .today-composer button {
+    min-height: 44px;
   }
 
   .care-nav-copy span + span {

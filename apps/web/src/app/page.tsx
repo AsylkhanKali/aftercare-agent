@@ -5,6 +5,7 @@ import { CopilotChat, useConfigureSuggestions } from "@copilotkit/react-core/v2"
 import Image from "next/image";
 import { AppControl } from "@/components/app-control";
 import { GenerativeUI } from "@/components/generative-ui";
+import { RecoveryDashboard } from "@/components/recovery-dashboard";
 import {
   EMPTY_INTAKE,
   assessSymptoms,
@@ -15,8 +16,10 @@ import {
 
 type BookingStatus = "idle" | "approval" | "calling" | "started" | "error";
 type ClinicSearchCriteria = { location: string; specialty: string };
+type AppSection = "today" | "find-care";
 
 export default function Home() {
+  const [activeSection, setActiveSection] = useState<AppSection>("today");
   const [intake, setIntake] = useState<Intake>(EMPTY_INTAKE);
   const [assessment, setAssessment] = useState<CareAssessment | null>(null);
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -116,8 +119,17 @@ export default function Home() {
       const response = await fetch("/api/calls/test", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "x-aftercare-demo-pin": demoCallPin,
         },
+        body: JSON.stringify({
+          clinicName: selectedClinic.name,
+          specialty: assessment?.specialty ?? "Primary care",
+          symptoms: intake.symptoms,
+          location: intake.location,
+          insurance: intake.insurance,
+          availability: intake.availability,
+        }),
       });
       const payload = await response.json() as { error?: string };
       if (!response.ok) throw new Error(payload.error ?? "The real test call could not be started.");
@@ -127,7 +139,7 @@ export default function Home() {
       setCallError(error instanceof Error ? error.message : "The real test call could not be started.");
       setBookingStatus("error");
     }
-  }, [demoCallPin, selectedClinic]);
+  }, [assessment?.specialty, demoCallPin, intake, selectedClinic]);
 
   const cancelCall = useCallback(() => {
     setBookingStatus("idle");
@@ -160,25 +172,54 @@ export default function Home() {
 
       <main className="care-shell">
         <nav className="care-nav" aria-label="Primary navigation">
-          <a className="care-brand" href="#top" aria-label="AfterCare home">
+          <button
+            type="button"
+            className="care-brand"
+            aria-label="Open AfterCare today view"
+            onClick={() => setActiveSection("today")}
+          >
             <Image
               className="care-brand-logo"
               src="/brand/aftercare-logo.jpeg"
-              alt=""
+              alt="AfterCare"
               width="190"
               height="59"
             />
-          </a>
+          </button>
+          <div className="care-section-nav" role="tablist" aria-label="AfterCare sections">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeSection === "today"}
+              className={activeSection === "today" ? "is-active" : ""}
+              onClick={() => setActiveSection("today")}
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeSection === "find-care"}
+              className={activeSection === "find-care" ? "is-active" : ""}
+              onClick={() => setActiveSection("find-care")}
+            >
+              Find care & call
+            </button>
+          </div>
           <div className="care-nav-copy">
             <span>Private demo</span>
             <span>Not medical diagnosis</span>
           </div>
         </nav>
 
+        {activeSection === "today" ? (
+          <RecoveryDashboard onFindCare={() => setActiveSection("find-care")} />
+        ) : (
+          <>
         <header className="care-header" id="top">
           <div>
             <p className="care-kicker">Healthcare navigation</p>
-            <h1>From symptoms to a confirmed visit.</h1>
+            <h1>From symptoms to a clinic-ready request.</h1>
             <p className="care-lead">
               Describe what is happening. AfterCare helps you find the right place and arrange a test appointment.
             </p>
@@ -342,7 +383,7 @@ export default function Home() {
                 <div className="care-section-heading care-section-heading-compact">
                   <div className="care-step">3</div>
                   <div>
-                    <p className="care-result-label">Appointment request</p>
+                    <p className="care-result-label">Clinic-call demo</p>
                     <h2>{selectedClinic.name}</h2>
                   </div>
                 </div>
@@ -352,11 +393,11 @@ export default function Home() {
                     <div className="care-consent-copy">
                       <p>A real call will go only to the verified team test number.</p>
                       <ul>
-                        <li>The deployed call lets you speak with the AfterCare AI prototype.</li>
-                        <li>Twilio transcribes your speech and OpenRouter generates each reply.</li>
-                        <li>The selected clinic and website intake are not sent into the call.</li>
+                        <li>Answer as a clinic receptionist; AfterCare will request an appointment for the patient.</li>
+                        <li>The selected clinic, specialty, symptoms, payment type, and preferred time are used in the call.</li>
+                        <li>Twilio transcribes the receptionist's replies and OpenRouter generates AfterCare's responses.</li>
                       </ul>
-                      <p>Use demo information only. Anything you say on the call is processed to generate a response.</p>
+                      <p>Use demo information only. The photo, identity, phone number, ID, and payment details are not sent.</p>
                       <label className="care-demo-pin" htmlFor="demo-call-pin">
                         <span>Team demo PIN</span>
                         <input
@@ -399,9 +440,9 @@ export default function Home() {
                 {bookingStatus === "started" && (
                   <div className="care-confirmation">
                     <p className="care-result-label">Real test call accepted</p>
-                    <strong>Answer the team phone</strong>
+                    <strong>Answer as the clinic receptionist</strong>
                     <span>Twilio accepted the outbound Trial call request.</span>
-                    <p>The call goes only to the configured test number. No clinic was contacted and no appointment was created.</p>
+                    <p>The call goes only to the configured team number. No real clinic is contacted and no real appointment is created.</p>
                   </div>
                 )}
 
@@ -439,6 +480,8 @@ export default function Home() {
             />
           </aside>
         </div>
+          </>
+        )}
 
         <footer className="care-footer">
           <strong>AfterCare prototype</strong>

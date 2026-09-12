@@ -1,5 +1,6 @@
 import { Buffer } from "node:buffer";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { sealVoiceBrief, type VoiceCallBrief } from "./voice-conversation";
 
 export type TestCallConfig = {
   accountSid: string;
@@ -112,9 +113,10 @@ export function verifyVoiceSessionToken(token: string, secret: string, now = Dat
   return provided.length === expected.length && timingSafeEqual(provided, expected);
 }
 
-function voiceUrlWithSession(url: string, secret: string) {
+function voiceUrlWithSession(url: string, secret: string, brief: VoiceCallBrief) {
   const parsed = new URL(url);
   parsed.searchParams.set("session", createVoiceSessionToken(secret));
+  parsed.searchParams.set("brief", sealVoiceBrief(brief, secret));
   return parsed.toString();
 }
 
@@ -148,12 +150,13 @@ export function isAllowedTestCallOrigin(request: Request, environment: Environme
 
 export async function createTwilioTestCall(
   config: TestCallConfig,
+  brief: VoiceCallBrief,
   fetcher: Fetcher = fetch,
 ) {
   const body = new URLSearchParams({
     To: config.toNumber,
     From: config.fromNumber,
-    Url: voiceUrlWithSession(config.voiceUrl, config.apiKeySecret),
+    Url: voiceUrlWithSession(config.voiceUrl, config.apiKeySecret, brief),
   });
   const response = await fetcher(
     `https://api.twilio.com/2010-04-01/Accounts/${config.accountSid}/Calls.json`,

@@ -3,24 +3,38 @@ import test from "node:test";
 import {
   generateVoiceReply,
   isVoiceEndIntent,
+  openVoiceBrief,
   openVoiceState,
+  parseVoiceCallBrief,
+  sealVoiceBrief,
   sealVoiceState,
   trimVoiceTurns,
   voiceActionUrl,
   voiceGatherTwiml,
   voiceHangupTwiml,
+  voiceOpeningPrompt,
+  type VoiceCallBrief,
   type VoiceConversationState,
 } from "./voice-conversation";
 
 const secret = "restricted-api-key-secret";
 const now = Date.UTC(2026, 8, 12, 12);
 const callSid = `CA${"a".repeat(32)}`;
+const brief: VoiceCallBrief = {
+  clinicName: "Harbor Family Clinic",
+  specialty: "Primary care",
+  symptoms: "A persistent cough for four days",
+  location: "Abu Dhabi",
+  insurance: "Self-pay",
+  availability: "Weekday afternoon",
+};
 
 test("voice conversation state is encrypted, authenticated, and expires", () => {
   const state: VoiceConversationState = {
     version: 1,
     callSid,
     expiresAt: now + 60_000,
+    brief,
     turns: [{ role: "user", content: "  What   should I ask?  " }],
   };
   const token = sealVoiceState(state, secret);
@@ -29,9 +43,30 @@ test("voice conversation state is encrypted, authenticated, and expires", () => 
   assert.deepEqual(openVoiceState(token, secret, now)?.turns, [
     { role: "user", content: "What should I ask?" },
   ]);
+  assert.deepEqual(openVoiceState(token, secret, now)?.brief, brief);
   assert.equal(openVoiceState(`${token}x`, secret, now), null);
   assert.equal(openVoiceState(token, "wrong-secret", now), null);
   assert.equal(openVoiceState(token, secret, now + 61_000), null);
+});
+
+test("call briefs are validated and encrypted before entering the voice URL", () => {
+  assert.deepEqual(parseVoiceCallBrief(brief), brief);
+  assert.equal(parseVoiceCallBrief({ ...brief, symptoms: "" }), null);
+  assert.equal(parseVoiceCallBrief({ ...brief, availability: null }), null);
+
+  const token = sealVoiceBrief(brief, secret);
+  assert.doesNotMatch(token, /persistent/);
+  assert.deepEqual(openVoiceBrief(token, secret), brief);
+  assert.equal(openVoiceBrief(`${token}x`, secret), null);
+});
+
+test("the opening is a concise professional request to the clinic", () => {
+  const opening = voiceOpeningPrompt(brief);
+  assert.match(opening, /automated assistant calling on behalf of a patient/i);
+  assert.match(opening, /Harbor Family Clinic/);
+  assert.match(opening, /persistent cough/);
+  assert.match(opening, /next available appointment/i);
+  assert.doesNotMatch(opening, /Twilio|OpenRouter|website|technical/i);
 });
 
 test("voice history stays short and keeps the latest turns", () => {
@@ -78,13 +113,30 @@ test("OpenRouter replies are short and speech friendly", async () => {
 
   const reply = await generateVoiceReply(
     [{ role: "user", content: "What should I ask?" }],
+    brief,
     { OPENROUTER_API_KEY: "test-key", MODEL: "openai/gpt-5-nano" },
     fetcher as typeof fetch,
   );
 
   assert.equal(reply, "Ask: your clinician about timing.");
-  assert.match(requestBody, /healthcare navigation/);
+  assert.match(requestBody, /outbound appointment coordinator/);
+  assert.match(requestBody, /Harbor Family Clinic/);
   assert.match(requestBody, /What should I ask/);
+});
+
+test("voice replies repair a common spoken grammar error", async () => {
+  const fetcher = async () => new Response(JSON.stringify({
+    choices: [{ message: { content: "Is any documents or preparation required?" } }],
+  }), { status: 200, headers: { "Content-Type": "application/json" } });
+
+  const reply = await generateVoiceReply(
+    [{ role: "user", content: "Tuesday at three thirty is available." }],
+    brief,
+    { OPENROUTER_API_KEY: "test-key" },
+    fetcher as typeof fetch,
+  );
+
+  assert.equal(reply, "Are any documents or preparation required?");
 });
 
 test("OpenRouter failures remain controlled", async () => {
@@ -92,6 +144,7 @@ test("OpenRouter failures remain controlled", async () => {
   await assert.rejects(
     generateVoiceReply(
       [{ role: "user", content: "Hello" }],
+      brief,
       { OPENROUTER_API_KEY: "test-key" },
       rejected as typeof fetch,
     ),
