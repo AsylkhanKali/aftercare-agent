@@ -66,6 +66,10 @@ test("accepts the exact local or configured deployment origin only", () => {
   assert.equal(isAllowedTestCallOrigin(deployment, {
     AFTERCARE_ALLOWED_ORIGIN: "https://other.example",
   }), false);
+
+  assert.equal(isAllowedTestCallOrigin(deployment, {
+    VERCEL_PROJECT_PRODUCTION_URL: "aftercare.example",
+  }), true);
 });
 
 test("creates a Twilio call to only the configured fixed destination", async () => {

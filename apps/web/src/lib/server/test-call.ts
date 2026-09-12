@@ -93,6 +93,12 @@ export function isAllowedTestCallOrigin(request: Request, environment: Environme
   const vercelHost = environment.VERCEL_URL?.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
   if (vercelHost) allowedOrigins.add(`https://${vercelHost}`);
 
+  const productionHost = environment.VERCEL_PROJECT_PRODUCTION_URL
+    ?.trim()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  if (productionHost) allowedOrigins.add(`https://${productionHost}`);
+
   return allowedOrigins.has(incomingOrigin);
 }
 
