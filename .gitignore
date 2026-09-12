@@ -1,8 +1,16 @@
+node_modules/
 .env
 .env.*
 !.env.example
-node_modules/
+*.log
 dist/
 .DS_Store
-*.log
+.turbo/
+*.tsbuildinfo
+.next/
+next-env.d.ts
+assets/fonts/
+apps/mobile/.expo/
 
+# Web approval and attempt metadata (not task storage)
+.data/
