@@ -7,7 +7,7 @@ export function GenerativeUI() {
   useHumanInTheLoop({
     name: "confirm_contact_plan",
     description:
-      "Ask for explicit approval before sharing appointment preferences or contacting a demo receptionist. Approval only confirms the plan. The user must still use the page button to start the test call.",
+      "Ask for explicit approval before sharing appointment preferences in a real call to the fixed verified team test number. Approval only confirms the plan. The user must still use the page button and private demo PIN to start the call. Never claim that a clinic will be called.",
     parameters: z.object({
       clinic: z.string(),
       detailsToShare: z.array(z.string()).max(4),
@@ -29,7 +29,7 @@ export function GenerativeUI() {
             <button
               type="button"
               className="care-primary-action"
-              onClick={() => respond("Approved. Prepare the page confirmation, but do not claim a call was made.")}
+              onClick={() => respond("Approved. Prepare the page confirmation for the fixed team test number, but do not claim a call was made yet.")}
             >
               Continue
             </button>

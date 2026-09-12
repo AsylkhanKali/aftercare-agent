@@ -501,6 +501,34 @@ a {
   padding-left: 20px;
 }
 
+.care-demo-pin {
+  display: grid;
+  gap: 7px;
+  max-width: 280px;
+  margin-top: 18px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.care-demo-pin input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--surface-strong);
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+}
+
+.care-demo-pin input:focus {
+  border-color: var(--accent);
+  outline: 2px solid rgba(23, 108, 85, 0.16);
+  outline-offset: 1px;
+}
+
 .care-actions {
   display: flex;
   align-items: center;
@@ -568,6 +596,23 @@ a {
 
 .care-confirmation > p:last-child {
   margin: 10px 0 0;
+}
+
+.care-call-error {
+  padding: 18px;
+  border: 1px solid rgba(167, 61, 61, 0.35);
+  border-radius: 11px;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.care-call-error p {
+  margin: 5px 0 0;
+  font-size: 13px;
+}
+
+.care-call-error .care-secondary-action {
+  margin-top: 0;
 }
 
 .care-assistant {

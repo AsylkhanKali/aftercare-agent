@@ -14,13 +14,13 @@ CopilotKit's Agents Everywhere starter kit: monorepo setup, CopilotKit runtime/p
 
 **What we built during the hackathon**
 
-The AfterCare intake, deterministic emergency guardrail, clinic discovery route, page-aware tools, generative care and clinic UI, explicit approval boundary, simulated appointment result, and complete visual design.
+The AfterCare intake, deterministic emergency guardrail, clinic discovery route, page-aware tools, generative care and clinic UI, explicit approval boundary, fixed-number Twilio call, and complete visual design.
 
 ## Title and description
 
 **What you built**
 
-AfterCare turns a symptom description into a non-diagnostic care suggestion, finds relevant clinics, and prepares a user-approved test appointment call.
+AfterCare turns a symptom description into a non-diagnostic care suggestion, finds relevant clinics, and can place a user-approved call to a fixed team test number.
 
 **Who it is for**
 
@@ -35,6 +35,8 @@ The assistant sees the current intake, safety assessment, clinic results, and ap
 - CopilotKit: page context, frontend tools, generative result cards, and human approval.
 - OpenRouter: tool-capable language model routing for the conversational navigator.
 - Exa: grounded clinic discovery and visible source links.
+
+Supporting infrastructure: Twilio Trial places a real outbound call limited to a verified team test number.
 
 ## Evidence for the judging criteria
 

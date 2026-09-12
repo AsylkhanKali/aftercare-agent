@@ -1,6 +1,6 @@
 "use client";
 
-import { type ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 import { CopilotChat, useConfigureSuggestions } from "@copilotkit/react-core/v2";
 import { AppControl } from "@/components/app-control";
 import { GenerativeUI } from "@/components/generative-ui";
@@ -12,7 +12,7 @@ import {
   type Intake,
 } from "@/lib/care";
 
-type BookingStatus = "idle" | "approval" | "calling" | "booked";
+type BookingStatus = "idle" | "approval" | "calling" | "started" | "error";
 type ClinicSearchCriteria = { location: string; specialty: string };
 
 export default function Home() {
@@ -25,6 +25,8 @@ export default function Home() {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [demoCallPin, setDemoCallPin] = useState("");
+  const [callError, setCallError] = useState("");
 
   useConfigureSuggestions(
     {
@@ -63,6 +65,7 @@ export default function Home() {
     setSelectedClinic(null);
     setBookingStatus("idle");
     setSearchError("");
+    setCallError("");
   }, [intake.symptoms]);
 
   const searchClinics = useCallback(async ({ location, specialty }: ClinicSearchCriteria) => {
@@ -101,17 +104,43 @@ export default function Home() {
   const chooseClinic = useCallback((clinic: Clinic) => {
     setSelectedClinic(clinic);
     setBookingStatus("approval");
+    setCallError("");
   }, []);
 
-  const approveTestCall = useCallback(() => {
-    if (!selectedClinic) return;
+  const approveTestCall = useCallback(async () => {
+    if (!selectedClinic || !assessment) return;
     setBookingStatus("calling");
-    window.setTimeout(() => setBookingStatus("booked"), 1800);
-  }, [selectedClinic]);
+    setCallError("");
+    try {
+      const response = await fetch("/api/calls/test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-aftercare-demo-pin": demoCallPin,
+        },
+        body: JSON.stringify({
+          clinicName: selectedClinic.name,
+          specialty: assessment.specialty,
+          location: intake.location,
+          preferredTime: intake.availability,
+          payment: intake.insurance,
+        }),
+      });
+      const payload = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? "The real test call could not be started.");
+      setBookingStatus("started");
+      setDemoCallPin("");
+    } catch (error) {
+      setCallError(error instanceof Error ? error.message : "The real test call could not be started.");
+      setBookingStatus("error");
+    }
+  }, [assessment, demoCallPin, intake.availability, intake.insurance, intake.location, selectedClinic]);
 
   const cancelCall = useCallback(() => {
     setBookingStatus("idle");
     setSelectedClinic(null);
+    setDemoCallPin("");
+    setCallError("");
   }, []);
 
   const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
@@ -123,11 +152,6 @@ export default function Home() {
   };
 
   const canAssess = intake.symptoms.trim().length >= 10 && intake.location.trim().length >= 2;
-  const bookedSlot = useMemo(
-    () => selectedClinic?.availability.find((slot) => !slot.startsWith("Call")) ?? "Tomorrow, 3:30 PM",
-    [selectedClinic],
-  );
-
   return (
     <>
       <GenerativeUI />
@@ -144,7 +168,7 @@ export default function Home() {
       <main className="care-shell">
         <nav className="care-nav" aria-label="Primary navigation">
           <a className="care-brand" href="#top" aria-label="AfterCare home">
-            <span className="care-brand-mark" aria-hidden="true">C</span>
+            <span className="care-brand-mark" aria-hidden="true">A</span>
             <span>AfterCare</span>
           </a>
           <div className="care-nav-copy">
@@ -328,17 +352,35 @@ export default function Home() {
                 {bookingStatus === "approval" && (
                   <>
                     <div className="care-consent-copy">
-                      <p>The demo receptionist will receive:</p>
+                      <p>A real call will go only to the verified team test number. The recipient will hear:</p>
                       <ul>
+                        <li>Selected option: {selectedClinic.name}</li>
                         <li>Requested specialty: {assessment?.specialty}</li>
                         <li>Preferred time: {intake.availability}</li>
                         <li>Payment: {intake.insurance}</li>
                       </ul>
-                      <p>Your symptom text and photo will not be shared.</p>
+                      <p>Your symptom text, photo, identity, and phone number will not be shared.</p>
+                      <label className="care-demo-pin" htmlFor="demo-call-pin">
+                        <span>Team demo PIN</span>
+                        <input
+                          id="demo-call-pin"
+                          type="password"
+                          autoComplete="off"
+                          inputMode="numeric"
+                          value={demoCallPin}
+                          onChange={(event) => setDemoCallPin(event.target.value)}
+                          placeholder="Required for a real call"
+                        />
+                      </label>
                     </div>
                     <div className="care-actions">
-                      <button type="button" className="care-primary-action" onClick={approveTestCall}>
-                        Approve test call
+                      <button
+                        type="button"
+                        className="care-primary-action"
+                        disabled={demoCallPin.length < 6}
+                        onClick={approveTestCall}
+                      >
+                        Place real test call
                       </button>
                       <button type="button" className="care-text-action" onClick={cancelCall}>
                         Cancel
@@ -351,18 +393,29 @@ export default function Home() {
                   <div className="care-call-state">
                     <span className="care-pulse" aria-hidden="true" />
                     <div>
-                      <strong>Test call in progress</strong>
-                      <p>Checking the first suitable appointment.</p>
+                      <strong>Starting a real test call</strong>
+                      <p>Twilio is dialing the verified team number.</p>
                     </div>
                   </div>
                 )}
 
-                {bookingStatus === "booked" && (
+                {bookingStatus === "started" && (
                   <div className="care-confirmation">
-                    <p className="care-result-label">Demo appointment confirmed</p>
-                    <strong>{bookedSlot}</strong>
-                    <span>{selectedClinic.location}</span>
-                    <p>No real clinic was contacted and no real appointment was created.</p>
+                    <p className="care-result-label">Real test call accepted</p>
+                    <strong>Answer the team phone</strong>
+                    <span>Twilio accepted the outbound call request.</span>
+                    <p>The call goes only to the configured test number. No clinic was contacted and no appointment was created.</p>
+                  </div>
+                )}
+
+                {bookingStatus === "error" && (
+                  <div className="care-call-error" role="alert">
+                    <strong>Call not started</strong>
+                    <p>{callError}</p>
+                    <div className="care-actions">
+                      <button type="button" className="care-secondary-action" onClick={() => setBookingStatus("approval")}>Try again</button>
+                      <button type="button" className="care-text-action" onClick={cancelCall}>Cancel</button>
+                    </div>
                   </div>
                 )}
               </section>
