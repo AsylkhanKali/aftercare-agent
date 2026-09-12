@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { CareAssessment, Clinic, Intake } from "@/lib/care";
 
 type BookingStatus = "idle" | "approval" | "calling" | "booked";
+type ClinicSearchCriteria = { location: string; specialty: string };
 
 export function AppControl({
   intake,
@@ -20,7 +21,7 @@ export function AppControl({
   clinics: Clinic[];
   selectedClinic: Clinic | null;
   bookingStatus: BookingStatus;
-  searchClinics: () => Promise<Clinic[]>;
+  searchClinics: (criteria: ClinicSearchCriteria) => Promise<Clinic[]>;
   chooseClinic: (clinic: Clinic) => void;
 }) {
   useAgentContext({
@@ -47,16 +48,26 @@ export function AppControl({
       name: "search_clinics",
       description:
         "Search for clinics matching the care assessment and location already present in page context. Use only after enough intake information is available. Results may be live Exa results or clearly labeled demo data.",
-      parameters: z.object({}),
-      handler: async () => {
-        const results = await searchClinics();
+      parameters: z.object({
+        location: z.string().describe("City or area from the current page context"),
+        specialty: z.string().describe("Suggested specialty from the current page assessment"),
+      }),
+      handler: async ({ location, specialty }) => {
+        if (assessment?.urgency === "emergency") {
+          return {
+            status: "blocked_emergency",
+            clinics: [],
+            message: "Routine clinic search is disabled for an emergency warning.",
+          };
+        }
+        const results = await searchClinics({ location, specialty });
         return {
           status: results.length ? "results_ready" : "no_results",
           clinics: results,
         };
       },
     },
-    [searchClinics],
+    [searchClinics, assessment?.urgency],
   );
 
   useFrontendTool(

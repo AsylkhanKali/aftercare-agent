@@ -7,6 +7,12 @@ type SearchRequest = {
   specialty?: string;
 };
 
+function conciseSummary(value?: string) {
+  const text = value?.replace(/\s+/g, " ").trim();
+  if (!text) return "Public clinic result found by Exa.";
+  return text.length > 220 ? `${text.slice(0, 217)}...` : text;
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as SearchRequest;
   const location = body.location?.trim();
@@ -38,7 +44,7 @@ export async function POST(request: Request) {
       id: `exa-${index}-${encodeURIComponent(hit.url).slice(0, 36)}`,
       name: hit.title,
       location,
-      summary: hit.highlight ?? "Public clinic result found by Exa.",
+      summary: conciseSummary(hit.highlight),
       source: "exa",
       sourceUrl: hit.url,
       availability: ["Call to confirm availability"],

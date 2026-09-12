@@ -13,6 +13,7 @@ import {
 } from "@/lib/care";
 
 type BookingStatus = "idle" | "approval" | "calling" | "booked";
+type ClinicSearchCriteria = { location: string; specialty: string };
 
 export default function Home() {
   const [intake, setIntake] = useState<Intake>(EMPTY_INTAKE);
@@ -64,8 +65,8 @@ export default function Home() {
     setSearchError("");
   }, [intake.symptoms]);
 
-  const searchClinics = useCallback(async () => {
-    if (!assessment || !intake.location) return [];
+  const searchClinics = useCallback(async ({ location, specialty }: ClinicSearchCriteria) => {
+    if (!location.trim() || !specialty.trim()) return [];
     setSearching(true);
     setSearchError("");
     try {
@@ -73,8 +74,8 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          location: intake.location,
-          specialty: assessment.specialty,
+          location,
+          specialty,
         }),
       });
       const payload = (await response.json()) as {
@@ -95,7 +96,7 @@ export default function Home() {
     } finally {
       setSearching(false);
     }
-  }, [assessment, intake.location]);
+  }, []);
 
   const chooseClinic = useCallback((clinic: Clinic) => {
     setSelectedClinic(clinic);
@@ -270,7 +271,10 @@ export default function Home() {
                     type="button"
                     className="care-secondary-action"
                     disabled={searching}
-                    onClick={searchClinics}
+                    onClick={() => searchClinics({
+                      location: intake.location,
+                      specialty: assessment.specialty,
+                    })}
                   >
                     {searching ? "Searching trusted sources..." : "Find matching clinics"}
                   </button>
